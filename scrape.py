@@ -10,11 +10,14 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 
-index = list(range(2377, 2381))  # Example range of event IDs
 base_url = "https://www.vlr.gg/stats/?event_group_id=all&event_id=1&series_id=all&region=all&min_rounds=25&min_rating=1550&agent=all&map_id=all&timespan=all"
+matches_url = "https://www.vlr.gg/event/matches/{}"
+players_stats_url = "https://www.vlr.gg/event/stats/{}"
 
 
-"""GET PLAYER STATS"""
+"""
+Find the event ID for the target events.
+"""
 service = Service(executable_path="D:/chromedriver-win64/chromedriver-win64/chromedriver.exe")
 driver = webdriver.Chrome(service=service)
 driver.get(base_url)
@@ -26,8 +29,35 @@ dropdown_element = wait.until(EC.visibility_of_element_located((By.NAME, 'event_
 
 options = dropdown_element.find_elements(By.TAG_NAME, 'option')
 
-filtered_options = [(option.text, option.get_attribute('value')) for option in options 
-                     if 'Champions Tour' in option.text or 'Challengers League' or 'Valorant Champions' in option.text]
-print("Filtered Options:", filtered_options)
+filtered_options = {option.get_attribute('value'): option.text for option in options 
+                    if 'Champions Tour' in option.text or 'Challengers League' in option.text or 'Valorant Champions' in option.text}
 
 driver.quit()
+
+"""
+Get the player stats for each event ID.
+"""
+driver = webdriver.Chrome(service=service)
+for event in filtered_options.keys():   
+    url_match = matches_url.format(event)
+    url_stats = players_stats_url.format(event)
+
+    driver.get(url_match)
+    driver.execute_script("window.scrollTo(1, 10000)")
+    time.sleep(2)
+
+    html = driver.page_source
+
+    with open("team/{}.html".format(event), "w+", encoding="utf-8") as f:
+        f.write(html)
+
+    driver.get(url_stats)
+    driver.execute_script("window.scrollTo(1, 10000)")
+    time.sleep(2)
+
+    html = driver.page_source
+
+    with open("player/{}.html".format(event), "w+", encoding="utf-8") as f:
+        f.write(html)
+
+

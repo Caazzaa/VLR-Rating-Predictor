@@ -44,7 +44,7 @@ for event in filtered_options.keys():
 
     driver.get(url_match)
     driver.execute_script("window.scrollTo(1, 10000)")
-    time.sleep(2)
+    time.sleep(1)
 
     html = driver.page_source
 
@@ -53,7 +53,7 @@ for event in filtered_options.keys():
 
     driver.get(url_stats)
     driver.execute_script("window.scrollTo(1, 10000)")
-    time.sleep(2)
+    time.sleep(1)
 
     html = driver.page_source
 

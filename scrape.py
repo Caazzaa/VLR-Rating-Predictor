@@ -34,30 +34,53 @@ filtered_options = {option.get_attribute('value'): option.text for option in opt
 
 driver.quit()
 
+# """
+# Get the player stats for each event ID.
+# """
+# driver = webdriver.Chrome(service=service)
+# for event in filtered_options.keys():   
+#     url_match = matches_url.format(event)
+#     url_stats = players_stats_url.format(event)
+
+#     driver.get(url_match)
+#     driver.execute_script("window.scrollTo(1, 10000)")
+#     time.sleep(1)
+
+#     html = driver.page_source
+
+#     with open("team/{}.html".format(event), "w+", encoding="utf-8") as f:
+#         f.write(html)
+
+#     driver.get(url_stats)
+#     driver.execute_script("window.scrollTo(1, 10000)")
+#     time.sleep(1)
+
+#     html = driver.page_source
+
+#     with open("player/{}.html".format(event), "w+", encoding="utf-8") as f:
+#         f.write(html)
+
 """
-Get the player stats for each event ID.
+Parse player stats
 """
-driver = webdriver.Chrome(service=service)
-for event in filtered_options.keys():   
-    url_match = matches_url.format(event)
-    url_stats = players_stats_url.format(event)
+dfs = []
+for event in filtered_options.keys():
+    with open("player/{}.html".format(event), encoding="utf-8") as f:
+        page = f.read()
 
-    driver.get(url_match)
-    driver.execute_script("window.scrollTo(1, 10000)")
-    time.sleep(1)
+    soup = bs(page, "html.parser")
 
-    html = driver.page_source
+    thead = soup.find('tr')
+    if thead:
+        thead.decompose()
 
-    with open("team/{}.html".format(event), "w+", encoding="utf-8") as f:
-        f.write(html)
+    player_table = soup.find("table")
+    player = pd.read_html(StringIO(str(player_table)))[0]
+    player["Event"] = filtered_options[event]
+    player["Event ID"] = event
+    dfs.append(player)
 
-    driver.get(url_stats)
-    driver.execute_script("window.scrollTo(1, 10000)")
-    time.sleep(1)
-
-    html = driver.page_source
-
-    with open("player/{}.html".format(event), "w+", encoding="utf-8") as f:
-        f.write(html)
+players = pd.concat(dfs)
+players.to_csv("players.csv")
 
 

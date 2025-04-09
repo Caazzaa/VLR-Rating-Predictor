@@ -83,6 +83,7 @@ for event in filtered_options.keys():
     dfs.append(player)
 
 players = pd.concat(dfs)
-players.to_csv("players.csv")
+players.columns = ['Player/Team', 'Agents', 'Rounds Played', 'Rating', 'ACS', 'KD', 'KAST', 'ADR', 'KPR', 'APR', 'FKPR', 'FDPR', 'HS%', 'Clutch%', 'Clutches (won/played)', 'Max Kills', 'Kills', 'Deaths', 'Assists', 'First Kills', 'First Deaths', 'Event', 'Event ID']
+players.to_csv("player_stats.csv", index=False)
 
 

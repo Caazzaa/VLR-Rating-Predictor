@@ -1,1 +1,0 @@
-player_stats = player_stats["Rating"].dropna()

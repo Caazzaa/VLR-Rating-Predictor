@@ -1,5 +1,6 @@
 import os
 import requests
+from datetime import datetime
 from bs4 import BeautifulSoup as bs
 import pandas as pd
 from io import StringIO
@@ -37,28 +38,28 @@ driver.quit()
 """
 Get the player stats for each event ID.
 """
-driver = webdriver.Chrome(service=service)
-for event in filtered_options.keys():   
-    url_match = matches_url.format(event)
-    url_stats = players_stats_url.format(event)
+# driver = webdriver.Chrome(service=service)
+# for event in filtered_options.keys():   
+#     url_match = matches_url.format(event)
+#     url_stats = players_stats_url.format(event)
 
-    driver.get(url_match)
-    driver.execute_script("window.scrollTo(1, 10000)")
-    time.sleep(1)
+#     driver.get(url_match)
+#     driver.execute_script("window.scrollTo(1, 10000)")
+#     time.sleep(1)
 
-    html = driver.page_source
+#     html = driver.page_source
 
-    with open("team/{}.html".format(event), "w+", encoding="utf-8") as f:
-        f.write(html)
+#     with open("team/{}.html".format(event), "w+", encoding="utf-8") as f:
+#         f.write(html)
 
-    driver.get(url_stats)
-    driver.execute_script("window.scrollTo(1, 10000)")
-    time.sleep(1)
+#     driver.get(url_stats)
+#     driver.execute_script("window.scrollTo(1, 10000)")
+#     time.sleep(1)
 
-    html = driver.page_source
+#     html = driver.page_source
 
-    with open("player/{}.html".format(event), "w+", encoding="utf-8") as f:
-        f.write(html)
+#     with open("player/{}.html".format(event), "w+", encoding="utf-8") as f:
+#         f.write(html)
 
 """
 Parse player stats
@@ -78,12 +79,30 @@ for event in filtered_options.keys():
 
     player_table = soup.find("table")
     player = pd.read_html(StringIO(str(player_table)))[0]
+    
+    date = soup.find("div", class_="event-desc-item-value")
+    date = date.get_text(strip=True).split("–")[0].strip().split("-")[0].strip()
+    date = date.replace(",", "")
+    print(date)
+    if len(date.split()) == 2:  # If year is missing, append the last year from the previous iteration
+        if dfs:  # Check if there is a previous iteration
+            last_year = dfs[-1]["Date"].dt.year.max()  # Get the latest year from the previous DataFrame
+        else:
+            last_year = datetime.now().year
+        date = f"{date} {last_year}"
+    try:
+        date = datetime.strptime(date, "%b %d %Y")
+    except ValueError:
+        raise ValueError(f"Date format is invalid or unrecognized: {date}")
+    print(date)
+
+    player["Date"] = date
     player["Event"] = filtered_options[event]
     player["Event ID"] = event
     dfs.append(player)
 
 players = pd.concat(dfs)
-players.columns = ['Player/Team', 'Agents', 'Rounds Played', 'Rating', 'ACS', 'KD', 'KAST', 'ADR', 'KPR', 'APR', 'FKPR', 'FDPR', 'HS%', 'Clutch%', 'Clutches (won/played)', 'Max Kills', 'Kills', 'Deaths', 'Assists', 'First Kills', 'First Deaths', 'Event', 'Event ID']
+players.columns = ['Player/Team', 'Agents', 'Rounds Played', 'Rating', 'ACS', 'KD', 'KAST', 'ADR', 'KPR', 'APR', 'FKPR', 'FDPR', 'HS%', 'Clutch%', 'Clutches (won/played)', 'Max Kills', 'Kills', 'Deaths', 'Assists', 'First Kills', 'First Deaths', 'Date', 'Event', 'Event ID']
 players.to_csv("player_stats.csv", index=False)
 
 

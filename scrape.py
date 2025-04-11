@@ -1,5 +1,6 @@
 import os
 import requests
+import regex as re
 from datetime import datetime
 from bs4 import BeautifulSoup as bs
 import pandas as pd
@@ -85,7 +86,9 @@ for event in filtered_options.keys():
     date = date.replace(",", "")
     print(date)
     if len(date.split()) == 2:  # If year is missing, append the last year from the previous iteration
-        if dfs:  # Check if there is a previous iteration
+        if re.match(r'.*([1-3][0-9]{3})', filtered_options[event]):
+            last_year = re.search(r'([1-3][0-9]{3})', filtered_options[event]).group(1)  # Extract the year from the date string
+        elif dfs:  # Check if there is a previous iteration
             last_year = dfs[-1]["Date"].dt.year.max()  # Get the latest year from the previous DataFrame
         else:
             last_year = datetime.now().year

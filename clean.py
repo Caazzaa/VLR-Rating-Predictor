@@ -2,8 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 
-player_stats = pd.read_csv("player_stats.csv", index_col=['Date'], parse_dates=True)
-print(player_stats.head())
+player_stats = pd.read_csv("player_stats.csv")
 """
 Convert Percentage Columns to Decimal
 """
@@ -32,8 +31,18 @@ player_stats = player_stats.set_index("Date")
 player_stats.copy()
 player_stats = player_stats.dropna(subset=["Rating"])
 null_count = player_stats.isnull().sum()
-print(null_count)
-print(player_stats.describe())
-print(player_stats.head())
+
+
+"""
+Sort by date and create an event number to mimic seasons
+"""
 player_stats = player_stats.sort_index()
-print(player_stats)
+event_mapping = {event: idx + 1 for idx, event in enumerate(sorted(player_stats["Event ID"].unique()))}
+player_stats["Event Number"] = player_stats["Event ID"].map(event_mapping)
+player_stats = player_stats.drop(columns=["Event ID"])
+
+"""
+Update CSV file
+"""
+player_stats.to_csv("player_stats.csv", index=False)
+print("Player stats cleaned and saved to player_stats.csv")

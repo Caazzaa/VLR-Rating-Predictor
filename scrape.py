@@ -39,28 +39,28 @@ driver.quit()
 """
 Get the player stats for each event ID.
 """
-driver = webdriver.Chrome(service=service)
-for event in filtered_options.keys():   
-    url_match = matches_url.format(event)
-    url_stats = players_stats_url.format(event)
+# driver = webdriver.Chrome(service=service)
+# for event in filtered_options.keys():   
+#     url_match = matches_url.format(event)
+#     url_stats = players_stats_url.format(event)
 
-    driver.get(url_match)
-    driver.execute_script("window.scrollTo(1, 10000)")
-    time.sleep(1)
+#     driver.get(url_match)
+#     driver.execute_script("window.scrollTo(1, 10000)")
+#     time.sleep(1)
 
-    html = driver.page_source
+#     html = driver.page_source
 
-    with open("team/{}.html".format(event), "w+", encoding="utf-8") as f:
-        f.write(html)
+#     with open("team/{}.html".format(event), "w+", encoding="utf-8") as f:
+#         f.write(html)
 
-    driver.get(url_stats)
-    driver.execute_script("window.scrollTo(1, 10000)")
-    time.sleep(1)
+#     driver.get(url_stats)
+#     driver.execute_script("window.scrollTo(1, 10000)")
+#     time.sleep(1)
 
-    html = driver.page_source
+#     html = driver.page_source
 
-    with open("player/{}.html".format(event), "w+", encoding="utf-8") as f:
-        f.write(html)
+#     with open("player/{}.html".format(event), "w+", encoding="utf-8") as f:
+#         f.write(html)
 
 """
 Parse player stats

@@ -39,28 +39,28 @@ driver.quit()
 """
 Get the player stats for each event ID.
 """
-# driver = webdriver.Chrome(service=service)
-# for event in filtered_options.keys():   
-#     url_match = matches_url.format(event)
-#     url_stats = players_stats_url.format(event)
+driver = webdriver.Chrome(service=service)
+for event in filtered_options.keys():   
+    url_match = matches_url.format(event)
+    url_stats = players_stats_url.format(event)
 
-#     driver.get(url_match)
-#     driver.execute_script("window.scrollTo(1, 10000)")
-#     time.sleep(1)
+    driver.get(url_match)
+    driver.execute_script("window.scrollTo(1, 10000)")
+    time.sleep(1)
 
-#     html = driver.page_source
+    html = driver.page_source
 
-#     with open("team/{}.html".format(event), "w+", encoding="utf-8") as f:
-#         f.write(html)
+    with open("team/{}.html".format(event), "w+", encoding="utf-8") as f:
+        f.write(html)
 
-#     driver.get(url_stats)
-#     driver.execute_script("window.scrollTo(1, 10000)")
-#     time.sleep(1)
+    driver.get(url_stats)
+    driver.execute_script("window.scrollTo(1, 10000)")
+    time.sleep(1)
 
-#     html = driver.page_source
+    html = driver.page_source
 
-#     with open("player/{}.html".format(event), "w+", encoding="utf-8") as f:
-#         f.write(html)
+    with open("player/{}.html".format(event), "w+", encoding="utf-8") as f:
+        f.write(html)
 
 """
 Parse player stats
@@ -79,6 +79,11 @@ for event in filtered_options.keys():
         thead.decompose()
 
     player_table = soup.find("table")
+    for row in player_table.find_all("tr"):
+        link = row.find("a", href=True)
+        if link:
+            player_link = link['href']
+            print(f"Player link: {player_link}")
     player = pd.read_html(StringIO(str(player_table)))[0]
     
     date = soup.find("div", class_="event-desc-item-value")

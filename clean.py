@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 
-player_stats = pd.read_csv("player_stats.csv")
+player_stats = pd.read_csv("player_stats.csv", index_col=['Date'], parse_dates=True)
 """
 Convert Percentage Columns to Decimal
 """
@@ -32,17 +32,32 @@ player_stats.copy()
 player_stats = player_stats.dropna(subset=["Rating"])
 null_count = player_stats.isnull().sum()
 
+"""
+Split Player/Team into Player and Team
+"""
+player_stats["Player"] = player_stats["Player/Team"].str.split(" ", expand=True)[0]
+player_stats["Team"] = player_stats["Player/Team"].str.split(" ", expand=True)[1].str.replace("\)", "").str.strip()
+player_stats = player_stats.drop(columns=["Player/Team"])
 
 """
 Sort by date and create an event number to mimic seasons
 """
 player_stats = player_stats.sort_index()
-event_mapping = {event: idx + 1 for idx, event in enumerate(sorted(player_stats["Event ID"].unique()))}
-player_stats["Event Number"] = player_stats["Event ID"].map(event_mapping)
+player_stats["Event Number"] = pd.factorize(player_stats["Event ID"])[0] + 1
 player_stats = player_stats.drop(columns=["Event ID"])
+print(player_stats.head(50))
+
+"""
+add column to denoate the event experience of the player
+"""
+player_stats["Experience"] = player_stats.groupby("Player")["Event Number"].transform(lambda x: x - x.min())
+player_stats["Experience"] = player_stats["Experience"].astype(int)
+player_stats["Experience"] = player_stats["Experience"].replace(0, 1)  # Replace 0 with 1 for first event experience
+print(player_stats.head(500))
 
 """
 Update CSV file
 """
-player_stats.to_csv("player_stats.csv", index=False)
+
+player_stats.to_csv("player_stats_cleaned.csv", index=False)
 print("Player stats cleaned and saved to player_stats.csv")

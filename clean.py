@@ -54,10 +54,7 @@ print(player_stats.head(50))
 """
 add column to denoate the event experience of the player
 """
-player_stats["Experience"] = player_stats.groupby("Player")["Event Number"].transform(lambda x: x - x.min())
-player_stats["Experience"] = player_stats["Experience"].astype(int)
-player_stats["Experience"] = player_stats["Experience"].replace(0, 1)  # Replace 0 with 1 for first event experience
-print(player_stats.head(500))
+player_stats["Experience"] = player_stats.groupby("Player ID").cumcount() + 1
 
 """
 Update CSV file

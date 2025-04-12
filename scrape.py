@@ -20,56 +20,57 @@ players_stats_url = "https://www.vlr.gg/event/stats/{}"
 """
 Find the event ID for the target events.
 """
-service = Service(executable_path="D:/chromedriver-win64/chromedriver-win64/chromedriver.exe")
-driver = webdriver.Chrome(service=service)
-driver.get(base_url)
+# service = Service(executable_path="D:/chromedriver-win64/chromedriver-win64/chromedriver.exe")
+# driver = webdriver.Chrome(service=service)
+# driver.get(base_url)
 
-os.makedirs("player", exist_ok=True)
+# os.makedirs("player", exist_ok=True)
 
-wait = WebDriverWait(driver, 10)
-dropdown_element = wait.until(EC.visibility_of_element_located((By.NAME, 'event_id')))
+# wait = WebDriverWait(driver, 10)
+# dropdown_element = wait.until(EC.visibility_of_element_located((By.NAME, 'event_id')))
 
-options = dropdown_element.find_elements(By.TAG_NAME, 'option')
+# options = dropdown_element.find_elements(By.TAG_NAME, 'option')
 
-filtered_options = {option.get_attribute('value'): option.text for option in options 
-                    if 'Champions Tour' in option.text or 'Challengers League' in option.text or 'Valorant Champions' in option.text}
+# filtered_options = {option.get_attribute('value'): option.text for option in options 
+#                     if 'Champions Tour' in option.text or 'Challengers League' in option.text or 'Valorant Champions' in option.text}
 
-driver.quit()
+# driver.quit()
 
 """
 Get the player stats for each event ID.
 """
-driver = webdriver.Chrome(service=service)
-for event in filtered_options.keys():   
-    url_match = matches_url.format(event)
-    url_stats = players_stats_url.format(event)
+# driver = webdriver.Chrome(service=service)
+# for event in filtered_options.keys():   
+#     url_match = matches_url.format(event)
+#     url_stats = players_stats_url.format(event)
 
-    driver.get(url_match)
-    driver.execute_script("window.scrollTo(1, 10000)")
-    time.sleep(1)
+#     driver.get(url_match)
+#     driver.execute_script("window.scrollTo(1, 10000)")
+#     time.sleep(1)
 
-    html = driver.page_source
+#     html = driver.page_source
 
-    with open("team/{}.html".format(event), "w+", encoding="utf-8") as f:
-        f.write(html)
+#     with open("team/{}.html".format(event), "w+", encoding="utf-8") as f:
+#         f.write(html)
 
-    driver.get(url_stats)
-    driver.execute_script("window.scrollTo(1, 10000)")
-    time.sleep(1)
+#     driver.get(url_stats)
+#     driver.execute_script("window.scrollTo(1, 10000)")
+#     time.sleep(1)
 
-    html = driver.page_source
+#     html = driver.page_source
 
-    with open("player/{}.html".format(event), "w+", encoding="utf-8") as f:
-        f.write(html)
+#     with open("player/{}.html".format(event), "w+", encoding="utf-8") as f:
+#         f.write(html)
 
 """
 Parse player stats
 """
 dfs = []
-for event in filtered_options.keys():
-    if not os.path.exists("player/{}.html".format(event)):
+for file in os.listdir("player"):
+    if not file.endswith(".html"):
         continue
-    with open("player/{}.html".format(event), encoding="utf-8") as f:
+    event = os.path.splitext(file)[0]
+    with open(f"player/{file}", encoding="utf-8") as f:
         page = f.read()
 
     soup = bs(page, "html.parser")
@@ -79,20 +80,28 @@ for event in filtered_options.keys():
         thead.decompose()
 
     player_table = soup.find("table")
-    for row in player_table.find_all("tr"):
+    player = pd.read_html(StringIO(str(player_table)))[0]
+    for index, row in enumerate(player_table.find_all("tr")):
         link = row.find("a", href=True)
         if link:
-            player_link = link['href']
-            print(f"Player link: {player_link}")
-    player = pd.read_html(StringIO(str(player_table)))[0]
+            player_link = link['href'].split("/")[2]
+            player.loc[index, 'Player ID'] = player_link
+
+    event_title = soup.find("h1", class_="wf-title").get_text(strip=True)
+    player["Event Title"] = event_title
+    print(event_title)
+
+    event_desc = soup.find("h2", class_="event-desc-subtitle").get_text(strip=True)
     
     date = soup.find("div", class_="event-desc-item-value")
     date = date.get_text(strip=True).split("–")[0].strip().split("-")[0].strip()
     date = date.replace(",", "")
     print(date)
     if len(date.split()) == 2:  # If year is missing, append the last year from the previous iteration
-        if re.match(r'.*([1-3][0-9]{3})', filtered_options[event]):
-            last_year = re.search(r'([1-3][0-9]{3})', filtered_options[event]).group(1)  # Extract the year from the date string
+        if re.match(r'.*([1-3][0-9]{3})', event_title):  # Check if the year is in the title
+            last_year = re.search(r'([1-3][0-9]{3})', event_title).group(1)  # Extract the year from the date string
+        elif re.match(r'.*([1-3][0-9]{3})', event_desc):
+            last_year = re.search(r'([1-3][0-9]{3})', event_desc).group(1)
         elif dfs:  # Check if there is a previous iteration
             last_year = dfs[-1]["Date"].dt.year.max()  # Get the latest year from the previous DataFrame
         else:
@@ -105,12 +114,11 @@ for event in filtered_options.keys():
     print(date)
 
     player["Date"] = date
-    player["Event"] = filtered_options[event]
     player["Event ID"] = event
     dfs.append(player)
 
 players = pd.concat(dfs)
-players.columns = ['Player/Team', 'Agents', 'Rounds Played', 'Rating', 'ACS', 'KD', 'KAST', 'ADR', 'KPR', 'APR', 'FKPR', 'FDPR', 'HS%', 'Clutch%', 'Clutches (won/played)', 'Max Kills', 'Kills', 'Deaths', 'Assists', 'First Kills', 'First Deaths', 'Date', 'Event', 'Event ID']
+players.columns = ['Player/Team', 'Agents', 'Rounds Played', 'Rating', 'ACS', 'KD', 'KAST', 'ADR', 'KPR', 'APR', 'FKPR', 'FDPR', 'HS%', 'Clutch%', 'Clutches (won/played)', 'Max Kills', 'Kills', 'Deaths', 'Assists', 'First Kills', 'First Deaths', 'Player ID', 'Event Title', 'Date', 'Event ID']
 players.to_csv("player_stats.csv", index=False)
 
 

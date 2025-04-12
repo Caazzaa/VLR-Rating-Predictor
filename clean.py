@@ -44,6 +44,11 @@ columns_order = ["Player ID", "Player", "Team"] + [col for col in player_stats.c
 player_stats = player_stats[columns_order]
 
 """
+Sort by Date
+"""
+player_stats = player_stats.sort_values(by=["Date"])
+
+"""
 add column to denoate the event experience of the player
 """
 player_stats["Experience"] = player_stats.groupby("Player ID").cumcount() + 1

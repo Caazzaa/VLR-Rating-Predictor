@@ -36,20 +36,12 @@ null_count = player_stats.isnull().sum()
 Split Player/Team into Player and Team
 """
 player_stats["Player"] = player_stats["Player/Team"].str.split(" ", expand=True)[0]
-player_stats["Team"] = player_stats["Player/Team"].str.split(" ", expand=True)[1].str.replace("\)", "").str.strip()
+player_stats["Team"] = player_stats["Player/Team"].str.split(" ", expand=True)[1].str.replace(" ", "").str.strip()
 player_stats = player_stats.drop(columns=["Player/Team"])
 
 # Reorder columns to make Player and Team the first and second columns
 columns_order = ["Player ID", "Player", "Team"] + [col for col in player_stats.columns if col not in ["Player ID", "Player", "Team"]]
 player_stats = player_stats[columns_order]
-
-"""
-Sort by date and create an event number to mimic seasons
-"""
-player_stats = player_stats.sort_index()
-player_stats["Event Number"] = pd.factorize(player_stats["Event ID"])[0] + 1
-player_stats = player_stats.drop(columns=["Event ID"])
-print(player_stats.head(50))
 
 """
 add column to denoate the event experience of the player

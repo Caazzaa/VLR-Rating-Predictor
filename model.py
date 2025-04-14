@@ -8,7 +8,7 @@ from sklearn.model_selection import TimeSeriesSplit
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 
-player_stats = pd.read_csv("player_stats_cleaned.csv")
+player_stats = pd.read_csv("player_stats_cleaned.csv", index_col=False)
 
 rr = Ridge(alpha=1)
 
@@ -23,13 +23,3 @@ scaler = MinMaxScaler()
 player_stats.loc[:, selected_columns] = scaler.fit_transform(player_stats[selected_columns])
 
 print(player_stats.head())
-
-# def next_season(player):
-#     player = player.sort_values("Experience")
-#     player["Next_Rating"] = player["Rating"].shift(-1)
-#     return player
-
-# player_stats = player_stats.groupby("Player ID", group_keys=False).filter(lambda x: x.shape[0] > 1)
-# player_stats = player_stats.groupby("Player ID", group_keys=False).apply(next_season)
-
-# print(player_stats.head())

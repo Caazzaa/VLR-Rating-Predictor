@@ -54,6 +54,18 @@ add column to denoate the event experience of the player
 player_stats["Experience"] = player_stats.groupby("Player ID").cumcount() + 1
 
 """
+Add next rating column
+"""
+def next_season(player):
+    player = player.sort_values("Experience")
+    player["Next_Rating"] = player["Rating"].shift(-1)
+    return player
+
+player_stats = player_stats.sample(frac=1, random_state=42)
+player_stats = player_stats.groupby("Player ID", group_keys=False).filter(lambda x: x.shape[0] > 1)
+player_stats = player_stats.groupby("Player ID", group_keys=False).apply(next_season).reset_index(drop=True)
+
+"""
 Update CSV file
 """
 player_stats.to_csv("player_stats_cleaned.csv", index=False)

@@ -1,1 +1,1 @@
-player_stats = player_stats.groupby("Player ID", group_keys=False).filter(lambda x: x.shape[0] > 1)
+player_stats = player_stats.sample(frac=1, random_state=42).reset_index(drop=True)

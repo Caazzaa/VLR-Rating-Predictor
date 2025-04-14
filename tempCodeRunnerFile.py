@@ -1,0 +1,1 @@
+player_stats = player_stats.groupby("Player ID", group_keys=False).filter(lambda x: x.shape[0] > 1)

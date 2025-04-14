@@ -56,6 +56,5 @@ player_stats["Experience"] = player_stats.groupby("Player ID").cumcount() + 1
 """
 Update CSV file
 """
-
 player_stats.to_csv("player_stats_cleaned.csv", index=False)
 print("Player stats cleaned and saved to player_stats.csv")

@@ -39,14 +39,19 @@ player_stats.copy()
 player_stats = player_stats.dropna(subset=["Rating"])
 null_count = player_stats.isnull().sum()
 
-# Reorder columns to make Player and Team the first and second columns
+"""
+Re-order Columns
+"""
 columns_order = ["Player ID", "Player"] + [col for col in player_stats.columns if col not in ["Player ID", "Player"]]
 player_stats = player_stats[columns_order]
 
 """
-Sort by Date
+Sort by Date and add chronological event number
 """
 player_stats = player_stats.sort_values(by=["Date"])
+player_stats["Event Number"] = pd.factorize(player_stats["Event ID"])[0] + 1
+player_stats = player_stats.drop(columns=["Event ID"])
+print(player_stats.head(50))
 
 """
 add column to denoate the event experience of the player

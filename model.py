@@ -34,5 +34,6 @@ print(player_stats.isnull().sum())
 sfs.fit(player_stats[selected_columns], player_stats["Next_Rating"])
 predictors = list(selected_columns[sfs.get_support()])
 
-print(selected_columns)
-print(predictors)
+def backtest(data, model, predictors, start=5, end=1):
+    all_preds = []
+    events = sorted(data)

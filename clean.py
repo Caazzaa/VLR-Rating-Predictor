@@ -13,6 +13,13 @@ player_stats["Clutches (won/played)"] = player_stats["Clutches (won/played)"].st
 player_stats = player_stats.rename(columns={"Clutches (won/played)": "Clutches Played"})
 
 """
+Split Player/Team into Player and Team
+"""
+player_stats["Player"] = player_stats["Player/Team"].str.split(" ", expand=True)[0]
+player_stats["Team"] = player_stats["Player/Team"].str.split(" ", expand=True)[1].str.replace(" ", "").str.strip()
+player_stats = player_stats.drop(columns=["Player/Team"])
+player_stats = player_stats.drop(columns=["Team"])
+"""
 Convert NaN to 0 or remove columns
 """
 player_stats = player_stats.drop(columns=["Agents"])
@@ -32,15 +39,8 @@ player_stats.copy()
 player_stats = player_stats.dropna(subset=["Rating"])
 null_count = player_stats.isnull().sum()
 
-"""
-Split Player/Team into Player and Team
-"""
-player_stats["Player"] = player_stats["Player/Team"].str.split(" ", expand=True)[0]
-player_stats["Team"] = player_stats["Player/Team"].str.split(" ", expand=True)[1].str.replace(" ", "").str.strip()
-player_stats = player_stats.drop(columns=["Player/Team"])
-
 # Reorder columns to make Player and Team the first and second columns
-columns_order = ["Player ID", "Player", "Team"] + [col for col in player_stats.columns if col not in ["Player ID", "Player", "Team"]]
+columns_order = ["Player ID", "Player"] + [col for col in player_stats.columns if col not in ["Player ID", "Player"]]
 player_stats = player_stats[columns_order]
 
 """

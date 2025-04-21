@@ -56,7 +56,7 @@ print(player_stats.head(50))
 """
 add column to denoate the event experience of the player
 """
-player_stats["Experience"] = player_stats.groupby("Player ID").cumcount() + 1
+player_stats["Experience"] = player_stats.groupby("Player ID").cumcount()
 
 """
 Add next rating column

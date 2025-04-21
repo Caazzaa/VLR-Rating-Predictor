@@ -80,3 +80,11 @@ print((mean_squared_error(new_predictions["Actual Rating"], new_predictions["Pre
 print(predictions)
 print((mean_squared_error(predictions["Actual Rating"], predictions["Predicted Rating"]))**0.5)
 
+"""
+TODOs:
+- Predict Future Ratings
+- Explore other models beside ridge regression
+- Engineer knew features to give better context
+- Allow user input to grab the future predictions or predictions for specific player or event
+"""
+

@@ -30,7 +30,7 @@ player_stats.loc[:, selected_columns] = scaler.fit_transform(player_stats[select
 sfs.fit(player_stats[selected_columns], player_stats["Next_Rating"])
 predictors = list(selected_columns[sfs.get_support()])
 
-def backtest(data, model, predictors, start=100, step=1):
+def backtest(data, model, predictors, start=120, step=1):
     all_preds = []
     events = sorted(data["Event Number"].unique())
     for i in range(start, len(events), step):
@@ -45,7 +45,8 @@ def backtest(data, model, predictors, start=100, step=1):
         combined = pd.concat([test["Next_Rating"], preds], axis=1)
         combined.columns = ["Actual Rating", "Predicted Rating"]
         all_preds.append(combined)
-        # all_preds.append(test[["Player", "Event Title"]])
+        combined["Player"] = test["Player"].values
+        combined["Event Title"] = test["Event Title"].values
     
     return pd.concat(all_preds)
 
@@ -76,7 +77,7 @@ print(player_stats["Next_Rating"].describe())
 
 new_predictions = backtest(player_stats_full, rr, new_predictors, start=5, step=1)
 print(new_predictions.isnull().sum())
-print(new_predictions)
+print(new_predictions[new_predictions["Event Title"] == "Champions Tour 2025: EMEA Stage 1"])
 print((mean_squared_error(new_predictions["Actual Rating"], new_predictions["Predicted Rating"]))**0.5)
 
 # print(predictions)

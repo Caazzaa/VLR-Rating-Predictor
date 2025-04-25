@@ -79,6 +79,8 @@ print(new_predictions[new_predictions["Event Title"] == "Champions Tour 2025: EM
 check_error = new_predictions.dropna(subset=["Actual Rating"])
 print((mean_squared_error(check_error["Actual Rating"], check_error["Predicted Rating"]))**0.5)
 
+new_predictions.to_csv("predictions.csv", index=False)
+
 """
 TODOs:
 - Predict Future Ratings: DONE

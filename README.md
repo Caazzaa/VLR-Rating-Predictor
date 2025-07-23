@@ -7,7 +7,7 @@ A machine learning project that predicts player ratings in Valorant using data s
 This project uses historical Valorant match data to train a machine learning model that predicts player ratings based on in-game performance statistics.
 
 > **Note:**  
-> The `scraper.py` script is **outdated as of April 2025** due to changes in the VLR.gg website structure.  
+> The `scrape.py` script is **outdated as of April 2025** due to changes in the VLR.gg website structure.  
 > All necessary data scraping and cleaning has already been completed.  
 > Simply run the model and prediction scripts using the provided CSV files in the root directory.
 
